@@ -18,7 +18,7 @@ def player_move(board, player, size):
     """Gets and validates the human player's move, then updates the board."""
     while True:
         try:
-            move = int(input(f"Player {player}, enter your move (1-{size*size}): "))
+            move = int(input(f"Player, enter your move (1-{size*size}): "))
             if 1 <= move <= size * size:
                 if board[move - 1] == " ":
                     board[move - 1] = player
@@ -66,14 +66,23 @@ def check_draw(board):
 def main(board_size=3, win_condition=3):
     """Main function to run the game."""
     board = [" "] * (board_size * board_size)
-    players = ["X", "O"]
-    current_player = random.choice(players)  # Random player selection
+    players = ["human", "machine"]
+    first_player = random.choice(players)  # Random player selection
     
-    print(f"Player {current_player} goes first.")
-    
+    if first_player == "human":
+      human_player = "X"
+      machine_player = "O"
+      current_player = human_player
+      print(f"The human player goes first with X.")
+    else:
+      human_player = "O"
+      machine_player = "X"
+      current_player = machine_player
+      print(f"The machine player goes first with X.")
+
     while True:
         display_board(board, board_size)
-        if current_player == "X":
+        if current_player == human_player:
             player_move(board, current_player, board_size)
         else:
             print("Machine is thinking...")
@@ -87,7 +96,10 @@ def main(board_size=3, win_condition=3):
 
         if check_win(board, current_player, board_size, win_condition):
             display_board(board, board_size)
-            print(f"Player {current_player} wins!")
+            if current_player == human_player:
+                print(f"The human player wins!")
+            else:
+                print(f"The machine player wins!")
             break
         elif check_draw(board):
             display_board(board, board_size)
@@ -95,7 +107,7 @@ def main(board_size=3, win_condition=3):
             break
         else:
             # Switch players
-            current_player = "O" if current_player == "X" else "X"
+            current_player = machine_player if current_player == human_player else human_player
 
 
 if __name__ == "__main__":
