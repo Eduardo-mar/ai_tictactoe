@@ -26,7 +26,6 @@ def player_move(board, player, size):
             print("Invalid input. Please enter a number.")
 
 
-
 def check_win(board, player, size, win_size):
     """Checks if the given player has won."""
     # Check rows
@@ -80,4 +79,4 @@ def main(board_size=3, win_condition=3):
 
 
 if __name__ == "__main__":
-    main(board_size=4, win_condition=4)
+    main()
