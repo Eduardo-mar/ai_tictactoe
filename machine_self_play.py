@@ -59,7 +59,7 @@ def random_self_play_data_collection(board_size=3, num_games=3000, games_per_fil
         games_in_file += 1
         
         if games_in_file >= games_per_file:
-            filename = f"random_self_play_data_{file_counter}.json"
+            filename = f"./data/random_self_play_data_{file_counter}.json"
             with open(filename, "w") as f:
                 json.dump(game_data, f, indent=4)
             print(f"Saved {games_in_file} games to {filename}")
@@ -69,7 +69,7 @@ def random_self_play_data_collection(board_size=3, num_games=3000, games_per_fil
     
     # Save remaining data, if any
     if game_data:
-        filename = f"random_self_play_data_{file_counter}.json"
+        filename = f"./data/random_self_play_data_{file_counter}.json"
         with open(filename, "w") as f:
             json.dump(game_data, f, indent=4)
         print(f"Saved {len(game_data)} games to {filename}")
