@@ -2,7 +2,8 @@
 import random
 import json
 from constants import X_SYMBOL, O_SYMBOL
-from game_functions import check_win, check_draw, get_random_move
+from game_functions import check_win, check_draw
+from machine import get_random_move
 
 
 def random_self_play_data_collection(board_size=3, num_games=3000, games_per_file=1000):
@@ -18,7 +19,7 @@ def random_self_play_data_collection(board_size=3, num_games=3000, games_per_fil
     while total_games_played < num_games:
         board = [" "] * (board_size * board_size)
         current_player = random.choice([X_SYMBOL, O_SYMBOL])
-        current_game = []
+        current_game = [] # List to hold game data for the current game
 
         while True:
             # Save the current board state, player, and move (for now None, will be updated later)
@@ -58,7 +59,7 @@ def random_self_play_data_collection(board_size=3, num_games=3000, games_per_fil
         games_in_file += 1
         
         if games_in_file >= games_per_file:
-            filename = f"random_self_play_data_{file_counter}.json"
+            filename = f"./data/random_self_play_data_{file_counter}.json"
             with open(filename, "w") as f:
                 json.dump(game_data, f, indent=4)
             print(f"Saved {games_in_file} games to {filename}")
@@ -68,7 +69,7 @@ def random_self_play_data_collection(board_size=3, num_games=3000, games_per_fil
     
     # Save remaining data, if any
     if game_data:
-        filename = f"random_self_play_data_{file_counter}.json"
+        filename = f"./data/random_self_play_data_{file_counter}.json"
         with open(filename, "w") as f:
             json.dump(game_data, f, indent=4)
         print(f"Saved {len(game_data)} games to {filename}")
