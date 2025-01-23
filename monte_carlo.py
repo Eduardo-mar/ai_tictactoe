@@ -4,47 +4,52 @@ from constants import X_SYMBOL, O_SYMBOL
 from game_functions import check_win, check_draw
 from machine import get_random_move
 
-def monte_carlo_simulation(board, player, board_size=3, original=True, original_player = " ", move_values = []):
+def monte_carlo_simulation(board, player, board_size=3):
   """
-  Performs Monte Carlo simulations to estimate the value of each possible move.
+      Performs Monte Carlo simulations to estimate the value of each possible move.
 
-  Args:
-    board (list): The current board state.
-    player (str): The current player (X or O).
-    board_size (int, optional): The size of the board. Defaults to 3.
-    num_simulations (int, optional): The number of simulations to run. Defaults to 100.
+    Args:
+      board (list): The current board state.
+      player (str): The current player (X or O).
+      board_size (int, optional): The size of the board. Defaults to 3.
 
-  Returns:
-    list: one-hot vector with the calculated value for every possible move.
+    Returns:
+      list: one-hot vector with the calculated value for every possible move.
   """
-  if original:
-    original_player = player
-    move_values = [0] * (board_size * board_size)
-  
-  # Iterate over each possible move
-  for move_index in range(board_size * board_size):
-    if board[move_index] == " ":
-      breakpoint()
-      #Make a copy of the board and play the current move
-      temp_board = list(board)
-      # breakpoint()
-      temp_board[move_index] = player
-      # breakpoint()
+  original_player = player
+  move_values = [0] * (board_size * board_size)
+  breakpoint()
 
-      # Check if this move is winner
-      if check_win(temp_board, player, board_size, board_size):
-        if player == original_player:
-          move_values[move_index] += 1
+  def find_best_path(board, player, board_size=3, original=True):
+    """
+
+    """
+    # Iterate over each possible move
+    for move_index in range(board_size * board_size):
+      if board[move_index] == " ":
+        breakpoint()
+        #Make a copy of the board and play the current move
+        temp_board = list(board)
+        # breakpoint()
+        temp_board[move_index] = player
+        # breakpoint()
+
+        # Check if this move is winner
+        if check_win(temp_board, player, board_size, board_size):
+          if player == original_player:
+            move_values[move_index] += 1
+          else:
+            move_values[move_index] -= 1
+        # Check if this move is a draw
+        elif check_draw(temp_board):
+          pass
         else:
-          move_values[move_index] -= 1
-      # Check if this move is a draw
-      elif check_draw(temp_board):
-        pass
-      else:
-        monte_carlo_simulation(temp_board, O_SYMBOL if player == X_SYMBOL else X_SYMBOL, board_size, False, original_player, move_values)
+          find_best_path(temp_board, O_SYMBOL if player == X_SYMBOL else X_SYMBOL, board_size, False)
 
-  if original:
-    return calculate_probabilities(move_values)
+    if original:
+      return calculate_probabilities(move_values)
+    
+  return find_best_path(board, player, board_size, True)
 
 def calculate_probabilities(move_values):
   """
