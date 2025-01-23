@@ -1,4 +1,3 @@
-# monte_carlo.py
 import numpy as np
 from constants import X_SYMBOL, O_SYMBOL
 from game_functions import check_win, check_draw
@@ -6,50 +5,53 @@ from machine import get_random_move
 
 def monte_carlo_simulation(board, player, board_size=3):
   """
-      Performs Monte Carlo simulations to estimate the value of each possible move.
+  Performs Monte Carlo simulations to estimate the value of each possible move.
 
-    Args:
+  Args:
       board (list): The current board state.
       player (str): The current player (X or O).
       board_size (int, optional): The size of the board. Defaults to 3.
 
-    Returns:
+  Returns:
       list: one-hot vector with the calculated value for every possible move.
   """
   original_player = player
+  # Initialize move_values as a local variable
   move_values = [0] * (board_size * board_size)
-  breakpoint()
 
-  def find_best_path(board, player, board_size=3, original=True):
+  def find_best_path(board, player, board_size=3, original=True, original_move=None, loop_n=0):
     """
-
+    Simulates all possible moves and calculates move values.
     """
-    # Iterate over each possible move
     for move_index in range(board_size * board_size):
       if board[move_index] == " ":
-        breakpoint()
-        #Make a copy of the board and play the current move
+        # Make a copy of the board and play the current move
         temp_board = list(board)
-        # breakpoint()
         temp_board[move_index] = player
-        # breakpoint()
 
         # Check if this move is winner
         if check_win(temp_board, player, board_size, board_size):
           if player == original_player:
-            move_values[move_index] += 1
+            if original:
+              move_values[move_index] += 1 * temp_board.count(" ")  # Reward for winning sooner
+            else: 
+              move_values[original_move] += 1/loop_n
           else:
-            move_values[move_index] -= 1
-        # Check if this move is a draw
+              move_values[original_move] -= 1/loop_n
+        # Check if this move results in a draw
         elif check_draw(temp_board):
-          pass
+          continue  # No impact on move values
         else:
-          find_best_path(temp_board, O_SYMBOL if player == X_SYMBOL else X_SYMBOL, board_size, False)
+        # elseif loop_n < 10:
+          # Recursive call for the opponent's turn
+          find_best_path(temp_board, O_SYMBOL if player == X_SYMBOL else X_SYMBOL, board_size, False, move_index if original else original_move, loop_n+1)
 
+    # Only calculate probabilities in the original call
     if original:
-      return calculate_probabilities(move_values)
-    
+        return calculate_probabilities(move_values)
+
   return find_best_path(board, player, board_size, True)
+
 
 def calculate_probabilities(move_values):
   """
@@ -61,7 +63,6 @@ def calculate_probabilities(move_values):
   Returns:
     list: The probabilities of winning for each move.
   """
-  breakpoint()
   z = np.array(move_values)
   beta = 1
   move_probabilities = np.exp(beta * z) / np.sum(np.exp(beta * z))
@@ -69,7 +70,6 @@ def calculate_probabilities(move_values):
   # z_exp = [math.exp(i) for i in move_values]
   # sum_z_exp = sum(z_exp)
   # move_probabilities = [round(i / sum_z_exp, 3) for i in z_exp]
-  # breakpoint()
 
 def play_random_game(board, current_player, board_size):
   """
@@ -78,18 +78,15 @@ def play_random_game(board, current_player, board_size):
   """
   while True:
     move = get_random_move(board)
-    # breakpoint()
     if move is not None:
       board[move] = current_player
     else:
       return None  # Draw
 
-    # breakpoint()
     if check_win(board, current_player, board_size, board_size):
       return current_player
     if check_draw(board):
       return None
-    # breakpoint()
     current_player = O_SYMBOL if current_player == X_SYMBOL else X_SYMBOL
 
 
@@ -100,9 +97,9 @@ if __name__ == '__main__':
   # probabilities = monte_carlo_simulation(initial_board, current_player)
   # print("Probabilities of win for each move",probabilities)
 
-  initial_board = ["X", "O", "O",
-                    "X", "O", "X",
-                    " ", "X", " "]
+  initial_board = ["X", "O", " ",
+                    " ", "X", " ",
+                    " ", " ", " "]
   current_player = O_SYMBOL
   probabilities = monte_carlo_simulation(initial_board, current_player)
-  print("Probabilities of win for each move",probabilities)
+  print("Probabilities of win for each move",probabilities)                        
