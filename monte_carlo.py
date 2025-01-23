@@ -37,12 +37,11 @@ def monte_carlo_simulation(board, player, board_size=3):
             else: 
               move_values[original_move] += 1/loop_n
           else:
-              move_values[original_move] -= 1/loop_n
+            move_values[original_move] += -1 if loop_n == 1 else 1/(loop_n**2)
         # Check if this move results in a draw
         elif check_draw(temp_board):
-          continue  # No impact on move values
-        else:
-        # elseif loop_n < 10:
+          move_values[original_move] += 1/(loop_n*2)
+        elif loop_n < 5:
           # Recursive call for the opponent's turn
           find_best_path(temp_board, O_SYMBOL if player == X_SYMBOL else X_SYMBOL, board_size, False, move_index if original else original_move, loop_n+1)
 
@@ -97,9 +96,10 @@ if __name__ == '__main__':
   # probabilities = monte_carlo_simulation(initial_board, current_player)
   # print("Probabilities of win for each move",probabilities)
 
-  initial_board = ["X", "O", " ",
-                    " ", "X", " ",
+  initial_board = [" ", " ", " ",
+                    " ", " ", " ",
                     " ", " ", " "]
-  current_player = O_SYMBOL
+  current_player = X_SYMBOL
   probabilities = monte_carlo_simulation(initial_board, current_player)
-  print("Probabilities of win for each move",probabilities)                        
+  print("Probabilities of win for each move",probabilities)
+  print("Best move:", np.argmax(probabilities)+1)                  
