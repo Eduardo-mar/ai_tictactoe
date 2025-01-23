@@ -52,7 +52,6 @@ def monte_carlo_simulation(board, player, board_size=3):
             move_values[i] = min(move_values) - 1
           elif move_values[i] == 0:
             move_values[i] = min(move_values)/10
-            breakpoint()
         return calculate_probabilities(move_values)
 
   return find_best_path(board, player, board_size, True)
