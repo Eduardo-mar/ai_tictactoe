@@ -42,11 +42,16 @@ def preprocess_data(data_dir):
         if filename.startswith("random_self_play_data_") and filename.endswith(".json"):
             filepath = os.path.join(data_dir, filename)
             with open(filepath, 'r') as f:
-                games = json.load(f)
+                try:
+                    games = json.load(f)
+                except json.JSONDecodeError as e:
+                    print(f"Error decoding JSON in {filename}: {e}")
+                    continue # Skip to the next file
 
             for game in games:
-                if not game:
-                    continue  # Skip empty games
+                if not isinstance(game, list) or len(game) == 0:
+                    print(f"Skipping invalid game data: {game}")
+                    continue  # Skip empty or invalid games
                 last_move = game[-1]
                 result = encode_outcome(last_move.get("result"))
                 game_data = []
@@ -70,12 +75,15 @@ def save_preprocessed_data(preprocessed_data, filename="./data/data_processed.js
 
 if __name__ == '__main__':
     data_directory = "./data/"  # Current directory for now
-    preprocessed_data = preprocess_data(data_directory)
-    save_preprocessed_data(preprocessed_data)
+    output_filename = "./data/my_preprocessed_data.json"
+    if not os.path.exists(data_directory):
+        print(f"Error: Data directory '{data_directory}' not found.")
+        preprocessed_data = preprocess_data(data_directory)
+        save_preprocessed_data(preprocessed_data)
 
 
-    # Print the first elements of the data
-    for element in preprocessed_data[:5]:
-        print(element)
+        # Print the first elements of the data
+        for element in preprocessed_data[:5]:
+            print(element)
 
-    print(f"\nTotal preprocessed moves: {len(preprocessed_data)}")
+        print(f"\nTotal preprocessed moves: {len(preprocessed_data)}")
