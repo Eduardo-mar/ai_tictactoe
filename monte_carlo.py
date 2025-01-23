@@ -47,6 +47,12 @@ def monte_carlo_simulation(board, player, board_size=3):
 
     # Only calculate probabilities in the original call
     if original:
+        for i in range(len(move_values)):
+          if move_values[i] == 0 and min(move_values) < 0:
+            move_values[i] = min(move_values) - 1
+          elif move_values[i] == 0:
+            move_values[i] = min(move_values)/10
+            breakpoint()
         return calculate_probabilities(move_values)
 
   return find_best_path(board, player, board_size, True)
@@ -96,10 +102,10 @@ if __name__ == '__main__':
   # probabilities = monte_carlo_simulation(initial_board, current_player)
   # print("Probabilities of win for each move",probabilities)
 
-  initial_board = [" ", " ", " ",
-                    " ", " ", " ",
-                    " ", " ", " "]
-  current_player = X_SYMBOL
+  initial_board = ["X", "O", "X",
+                    "X", "O", "X",
+                    " ", "X", " "]
+  current_player = O_SYMBOL
   probabilities = monte_carlo_simulation(initial_board, current_player)
   print("Probabilities of win for each move",probabilities)
   print("Best move:", np.argmax(probabilities)+1)                  
