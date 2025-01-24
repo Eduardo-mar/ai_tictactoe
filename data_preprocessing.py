@@ -1,18 +1,17 @@
 # data_preprocessing.py
 import json
 import os
-from constants import X_SYMBOL, O_SYMBOL, HUMAN, MACHINE
+from constants import X_SYMBOL, O_SYMBOL, HUMAN
+import numpy as np
 
 def encode_board(board):
     """Encodes a board state into a list of integers."""
-    encoding = []
-    for cell in board:
-        if cell == " ":
-            encoding.append(0)
-        elif cell == X_SYMBOL:
-            encoding.append(1)
+    encoding = np.zeros(9, dtype=np.int8)  # Assuming 3x3 board
+    for i, cell in enumerate(board):
+        if cell == X_SYMBOL:
+            encoding[i] = 1
         elif cell == O_SYMBOL:
-            encoding.append(2)
+            encoding[i] = 2
     return encoding
 
 def encode_player(player):
@@ -24,12 +23,12 @@ def encode_player(player):
 def encode_outcome(outcome):
     """Encodes the game outcome into a one-hot vector."""
     if outcome == X_SYMBOL:
-        return [1, 0, 0]
+        return np.array([1, 0, 0], dtype=np.float32)
     elif outcome == O_SYMBOL:
-        return [0, 1, 0]
+        return np.array([0, 1, 0], dtype=np.float32)
     elif outcome == "draw":
-        return [0, 0, 1]
-    return [0,0,0] # Default case
+        return np.array([0, 0, 1], dtype=np.float32)
+    return np.array([0, 0, 0], dtype=np.float32) # Default case
 
 def preprocess_data(data_dir):
     """
@@ -62,14 +61,23 @@ def preprocess_data(data_dir):
                         move = move_data.get("move")
                         game_data.append((encoded_board, encoded_player, move, result))
                 preprocessed_data.append(game_data)
+    # Convert to Numpy arrays
 
-    return preprocessed_data
+    X = []
+    Y = []
+    for game_data in preprocessed_data:
+        for encoded_board, encoded_player, move, result in game_data:
+            X.append(encoded_board)
+            Y.append(result)
+
+    X = np.array(X)
+    Y = np.array(Y)
+    return X,Y
 
 
-def save_preprocessed_data(preprocessed_data, filename="./data/data_processed.json"):
+def save_preprocessed_data(X,Y, filename="./data/data_processed.npz"):
   """Saves the preprocessed data to a JSON file."""
-  with open(filename, "w") as f:
-      json.dump(preprocessed_data, f, indent=4)
+  np.savez(filename, X=X, Y=Y)
   print(f"Preprocessed data saved to {filename}")
 
 
@@ -78,12 +86,10 @@ if __name__ == '__main__':
     output_filename = "./data/my_preprocessed_data.json"
     if os.path.exists(data_directory):
         print(f"Error: Data directory '{data_directory}' not found.")
-        preprocessed_data = preprocess_data(data_directory)
-        save_preprocessed_data(preprocessed_data)
-
+        X,Y = preprocess_data(data_directory)
+        save_preprocessed_data(X,Y)
 
         # Print the first elements of the data
-        for element in preprocessed_data[:5]:
-            print(element)
+        print(X[:5])
 
-        print(f"\nTotal preprocessed moves: {len(preprocessed_data)}")
+        print(f"\nTotal preprocessed moves: {len(X)}")
