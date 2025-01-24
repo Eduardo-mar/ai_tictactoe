@@ -1,3 +1,4 @@
+# game_functions.py
 import random
 from constants import HUMAN, MACHINE, X_SYMBOL, O_SYMBOL
 
