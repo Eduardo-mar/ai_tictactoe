@@ -76,7 +76,7 @@ def save_preprocessed_data(preprocessed_data, filename="./data/data_processed.js
 if __name__ == '__main__':
     data_directory = "./data/"  # Current directory for now
     output_filename = "./data/my_preprocessed_data.json"
-    if not os.path.exists(data_directory):
+    if os.path.exists(data_directory):
         print(f"Error: Data directory '{data_directory}' not found.")
         preprocessed_data = preprocess_data(data_directory)
         save_preprocessed_data(preprocessed_data)
