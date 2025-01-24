@@ -1,8 +1,9 @@
 # data_preprocessing.py
 import json
 import os
-from constants import X_SYMBOL, O_SYMBOL, HUMAN
 import numpy as np
+from constants import X_SYMBOL, O_SYMBOL, HUMAN
+from monte_carlo import monte_carlo_simulation
 
 def encode_board(board):
     """Encodes a board state into a list of integers."""
@@ -15,20 +16,16 @@ def encode_board(board):
     return encoding
 
 def encode_player(player):
-   """Encodes a player into 0 or 1"""
-   if player == X_SYMBOL or player == HUMAN:
-      return 1
-   return 0
+    """Encodes a player into 0 or 1"""
+    if player == X_SYMBOL or player == HUMAN:
+        return 1
+    return 0
 
-def encode_outcome(outcome):
-    """Encodes the game outcome into a one-hot vector."""
-    if outcome == X_SYMBOL:
-        return np.array([1, 0, 0], dtype=np.float32)
-    elif outcome == O_SYMBOL:
-        return np.array([0, 1, 0], dtype=np.float32)
-    elif outcome == "draw":
-        return np.array([0, 0, 1], dtype=np.float32)
-    return np.array([0, 0, 0], dtype=np.float32) # Default case
+def encode_outcome(board, player):
+    """Encodes the move probabilities for the board state."""
+    probabilities = monte_carlo_simulation(board, player)
+    return np.array(probabilities, dtype=np.float32)
+
 
 def preprocess_data(data_dir):
     """
@@ -51,24 +48,21 @@ def preprocess_data(data_dir):
                 if not isinstance(game, list) or len(game) == 0:
                     print(f"Skipping invalid game data: {game}")
                     continue  # Skip empty or invalid games
-                last_move = game[-1]
-                result = encode_outcome(last_move.get("result"))
-                game_data = []
                 for move_data in game:
                     if move_data.get("move") is not None:
                         encoded_board = encode_board(move_data.get("board"))
                         encoded_player = encode_player(move_data.get("player"))
                         move = move_data.get("move")
-                        game_data.append((encoded_board, encoded_player, move, result))
-                preprocessed_data.append(game_data)
+                        encoded_outcome = encode_outcome(move_data.get("board"), move_data.get("player"))
+                        preprocessed_data.append((encoded_board, encoded_player, move, encoded_outcome))
+
     # Convert to Numpy arrays
 
     X = []
     Y = []
-    for game_data in preprocessed_data:
-        for encoded_board, encoded_player, move, result in game_data:
-            X.append(encoded_board)
-            Y.append(result)
+    for encoded_board, encoded_player, move, encoded_outcome in preprocessed_data:
+        X.append(encoded_board)
+        Y.append(encoded_outcome)
 
     X = np.array(X)
     Y = np.array(Y)
@@ -76,16 +70,14 @@ def preprocess_data(data_dir):
 
 
 def save_preprocessed_data(X,Y, filename="./data/data_processed.npz"):
-  """Saves the preprocessed data to a JSON file."""
-  np.savez(filename, X=X, Y=Y)
-  print(f"Preprocessed data saved to {filename}")
-
+    """Saves the preprocessed data to a JSON file."""
+    np.savez(filename, X=X, Y=Y)
+    print(f"Preprocessed data saved to {filename}")
 
 if __name__ == '__main__':
     data_directory = "./data/"  # Current directory for now
     output_filename = "./data/my_preprocessed_data.json"
     if os.path.exists(data_directory):
-        print(f"Error: Data directory '{data_directory}' not found.")
         X,Y = preprocess_data(data_directory)
         save_preprocessed_data(X,Y)
 
@@ -93,3 +85,5 @@ if __name__ == '__main__':
         print(X[:5])
 
         print(f"\nTotal preprocessed moves: {len(X)}")
+    else:
+        print(f"Error: Data directory '{data_directory}' not found.")
