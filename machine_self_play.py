@@ -3,7 +3,7 @@ import random
 import json
 from constants import X_SYMBOL, O_SYMBOL
 from game_functions import check_win, check_draw
-from machine import get_random_move
+from machine import get_best_move_mcts, get_epsilon_move
 
 
 def random_self_play_data_collection(board_size=3, num_games=3000, games_per_file=1000):
@@ -24,8 +24,10 @@ def random_self_play_data_collection(board_size=3, num_games=3000, games_per_fil
 
         while True:
             # Get the move
-            move = get_random_move(board)
-
+            move = get_epsilon_move(board, current_player)
+            # The 50% of the moves will be the best move
+            if random.random() < 0.5:
+                move = int(get_best_move_mcts(board, current_player))
             #If there is no move, means that it is a draw
             if move is None:
                 result = "draw"
