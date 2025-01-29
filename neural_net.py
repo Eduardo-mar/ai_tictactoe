@@ -12,9 +12,12 @@ Y = data['Y']
 X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 # 3. Create the Model
-def create_model(input_shape=(9,)):
+def create_model(input_shape=(10,)):
     model = Sequential([
         Dense(64, activation='relu', input_shape=input_shape),
+        Dense(128, activation='relu'),
+        Dense(256, activation='relu'),
+        Dense(128, activation='relu'),
         Dense(64, activation='relu'),
         Dense(9, activation='softmax')
     ])
@@ -39,8 +42,8 @@ print('Validation Accuracy:', accuracy)
 num_examples_to_show = 10
 print(f"\nShowing {num_examples_to_show} predictions from validation data:")
 for i in range(num_examples_to_show):
-    board_state = X_val[i].reshape(1,9)
-    predicted_probs = model.predict(board_state, verbose=0) #Reshape so we have the shape that the model expects
+    board_state = X_val[i].reshape(1,10)
+    predicted_probs = model.predict(board_state, verbose=0)
     predicted_move = np.argmax(predicted_probs)
     actual_probs = Y_val[i]
     actual_move = np.argmax(actual_probs)
@@ -49,4 +52,4 @@ for i in range(num_examples_to_show):
     print(f"   Actual move: {actual_move + 1}, Probabilities: {actual_probs}")
 
 # 8. Save the Model
-model.save('./models/trained_model_v2.h5')  # Replace with your desired path
+model.save('./models/trained_model_1.h5')  # Replace with your desired path
